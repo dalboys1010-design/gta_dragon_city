@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GTA: Dragon City - by @dragon_craft</title>
+<style>body{margin:0;background:#111;color:#fff;font-family:sans-serif;text-align:center}canvas{display:block;margin:auto;border:3px solid #ffaa00;background:#2a5a2a}button{padding:12px 20px;background:#ffaa00;border:none;border-radius:10px;font-weight:bold;margin:4px}</style>
+</head>
+<body>
+<h1>🐉 GTA: DRAGON CITY</h1>
+<p>by @dragon_craft | Duit: <b id="money">0</b> | Wanted: <b id="wanted">0</b> | HP: <b id="hp">100</b></p>
+<canvas id="game" width="360" height="520"></canvas>
+<p>WASD / Tap untuk jalan. Deket mobil pencet tombol.</p>
+<button onclick="enterCar()">🚗 NAIK MOBIL</button>
+<button onclick="doAction()">🔥 CURI +$30</button>
+<p id="msg">Selamat datang di Dragon City! Kumpulin $500 buat menang!</p>
+<script>
+let cv=document.getElementById('game'),ctx=cv.getContext('2d');
+let p={x:180,y:260,inCar:false,hp:100,money:0,wanted:0};
+let keys={};
+let cars=[{x:60,y:100},{x:280,y:400},{x:200,y:150}];
+let cops=[{x:100,y:50},{x:250,y:450}];
+let coins=[{x:80,y:200},{x:280,y:300},{x:150,y:400},{x:50,y:450}];
+function draw(){
+ctx.fillStyle='#2a5a2a';ctx.fillRect(0,0,360,520);
+ctx.fillStyle='#333';ctx.fillRect(0,240,360,40);ctx.fillRect(160,0,40,520);
+coins.forEach(c=>{ctx.font='20px sans-serif';ctx.fillText('💰',c.x,c.y)});
+cars.forEach(c=>{ctx.font='28px sans-serif';ctx.fillText('🚗',c.x,c.y)});
+cops.forEach(c=>{ctx.font='24px sans-serif';ctx.fillText('👮',c.x,c.y)});
+ctx.font='32px sans-serif';ctx.fillText(p.inCar?'🚙':'🐉',p.x,p.y);
+document.getElementById('money').innerText=p.money;
+document.getElementById('wanted').innerText=p.wanted;
+document.getElementById('hp').innerText=p.hp;
+}
+function update(){
+let s=p.inCar?6:3;
+if(keys['w'])p.y-=s; if(keys['s'])p.y+=s; if(keys['a'])p.x-=s; if(keys['d'])p.x+=s;
+p.x=Math.max(0,Math.min(340,p.x)); p.y=Math.max(0,Math.min(500,p.y));
+coins.forEach((c,i)=>{if(Math.abs(c.x-p.x)<22&&Math.abs(c.y-p.y)<22){p.money+=50;coins[i]={x:Math.random()*320+20,y:Math.random()*480+20};document.getElementById('msg').innerText='Dapet $50!';}});
+cops.forEach(c=>{let dx=p.x-c.x,dy=p.y-c.y,d=Math.sqrt(dx*dx+dy*dy)||1; if(p.wanted>0){c.x+=dx/d*1.2;c.y+=dy/d*1.2;} if(d<25){p.hp-=1; if(p.hp<=0){alert('KETANGKEP! Duit:'+p.money);location.reload();}}});
+if(p.money>=500)document.getElementById('msg').innerText='MENANG! Kamu Raja Dragon City!';
+draw(); requestAnimationFrame(update);
+}
+document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+cv.addEventListener('touchstart',e=>{let t=e.touches[0],r=cv.getBoundingClientRect(),x=t.clientX-r.left,y=t.clientY-r.top; if(x<p.x)p.x-=25; if(x>p.x)p.x+=25; if(y<p.y)p.y-=25; if(y>p.y)p.y+=25;});
+function enterCar(){let n=cars.find(c=>Math.abs(c.x-p.x)<40&&Math.abs(c.y-p.y)<40); if(n){p.inCar=!p.inCar;document.getElementById('msg').innerText=p.inCar?'Naik mobil! Gaspol!':'Turun!';} else document.getElementById('msg').innerText='Deketin mobil dulu!';}
+function doAction(){p.money+=30;p.wanted=Math.min(5,p.wanted+1);document.getElementById('msg').innerText='Nyuri! +$30, Wanted naik! Kabur!';}
+draw(); update();
+</script>
+</body>
+</html>
